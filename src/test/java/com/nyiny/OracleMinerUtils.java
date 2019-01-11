@@ -26,11 +26,10 @@ import java.util.List;
  * create role logmnr_role;
  * grant create session to logmnr_role;
  * grant  execute_catalog_role,select any transaction ,select any dictionary to logmnr_role;
- * create user miner identified by minerpass;
- * grant  logmnr_role to miner;
- * alter user miner quota unlimited on users;
+ * grant  logmnr_role to ...;
  *
  * add additional privilege must be granted before running OracleScnAllLogsImplFlatFile
+ * SQL> grant LOGMINING to ...
  * SQL> grant read, write on directory DATA_PUMP_DIR to LOGMNR_ROLE; (use this existing dir)
  *
  */
@@ -65,9 +64,9 @@ class OracleMinerUtils {
                 "SELECT scn, commit_scn, username, operation, seg_owner, src_con_name, sql_redo " +
                         "FROM v$logmnr_contents " +
                         "WHERE " +
-                        "username = '"+ schemaName +"' " +
+                        "username = '"+ schemaName.toUpperCase() +"' " +
                         " AND OPERATION_CODE in (1,2,3) " +
-                        "AND seg_owner = '"+ schemaName +"' " +
+                        "AND seg_owner = '"+ schemaName.toUpperCase() +"' " +
                         "AND (commit_scn > ? )";
 //                    " OR scn > ?)";
 
@@ -77,9 +76,9 @@ class OracleMinerUtils {
                 "SELECT scn, commit_scn, username, operation, seg_owner, src_con_name, sql_redo " +
                         "FROM v$logmnr_contents " +
                         "WHERE " +
-                        "username = '"+ schemaName +"' " +
+                        "username = '"+ schemaName.toUpperCase() +"' " +
                         " AND OPERATION_CODE in (1,2,3) " +
-                        "AND seg_owner = '"+ schemaName +"' " +
+                        "AND seg_owner = '"+ schemaName.toUpperCase() +"' " +
                         "AND (COMMIT_TIMESTAMP > ? )";
 
     }
@@ -163,7 +162,7 @@ class OracleMinerUtils {
 
     static long getCurrentScn(Connection connection) throws SQLException {
         Statement s = connection.createStatement();
-        ResultSet res = s.executeQuery("select min(current_scn) CURRENT_SCN from gv$database");
+        ResultSet res = s.executeQuery("select min(current_scn) CURRENT_SCN from v$database");
         res.next();
         long scn = res.getLong(1);
         res.close();
